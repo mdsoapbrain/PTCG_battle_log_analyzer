@@ -1,0 +1,275 @@
+Setup
+Bregaglio21 chose heads for the opening coin flip.
+Bregaglio21 won the coin toss.
+Bregaglio21 decided to go first.
+Bregaglio21 drew 7 cards for the opening hand.
+- 7 drawn cards.
+Neurologist2024 drew 7 cards for the opening hand.
+- 7 drawn cards.
+   • Forest of Vitality, Night Stretcher, Basic Grass Energy, Basic Grass Energy, Basic Grass Energy, Dolliv, Teal Mask Ogerpon ex
+Bregaglio21 played Budew to the Active Spot.
+Neurologist2024 played Teal Mask Ogerpon ex to the Active Spot.
+
+[playerName]'s Turn
+Bregaglio21 drew a card.
+Bregaglio21 played Ultra Ball.
+- Bregaglio21 discarded 2 cards.
+   • Enhanced Hammer, Night Stretcher
+- Bregaglio21 drew Slowpoke.
+- Bregaglio21 shuffled their deck.
+Bregaglio21 played Slowpoke to the Bench.
+Bregaglio21 ended their turn.
+
+[playerName]'s Turn
+Neurologist2024 drew Smoliv.
+Neurologist2024 played Smoliv to the Bench.
+Neurologist2024's Teal Mask Ogerpon ex used Teal Dance.
+- Neurologist2024 attached Basic Grass Energy to Teal Mask Ogerpon ex in the Active Spot.
+- Neurologist2024 drew Bayleef.
+Neurologist2024 attached Basic Grass Energy to Teal Mask Ogerpon ex in the Active Spot.
+Neurologist2024 ended their turn.
+
+[playerName]'s Turn
+Bregaglio21 drew a card.
+Bregaglio21 played Academy at Night to the Stadium spot.
+Bregaglio21 played Lillie's Determination.
+- Bregaglio21 shuffled 3 cards into their deck.
+- Bregaglio21 drew 8 cards.
+Bregaglio21 evolved Slowpoke to Slowking on the Bench.
+Bregaglio21 played Slowpoke to the Bench.
+Bregaglio21 played Nest Ball.
+- Bregaglio21 drew Mega Kangaskhan ex and played it to the Bench.
+- Bregaglio21 shuffled their deck.
+Bregaglio21 attached Jet Energy to Mega Kangaskhan ex on the Bench.
+Jet Energy was activated.
+- Bregaglio21's Mega Kangaskhan ex was switched with Bregaglio21's Budew to become the Active Pokemon.
+Bregaglio21's Mega Kangaskhan ex is now in the Active Spot.
+Bregaglio21 attached Powerglass to Slowking on the Bench.
+Bregaglio21's Mega Kangaskhan ex used Run Errand.
+- Bregaglio21 drew 2 cards.
+Bregaglio21 played Latias ex to the Bench.
+Bregaglio21 played Ultra Ball.
+- Bregaglio21 discarded 2 cards.
+   • Squawkabilly ex, Carmine
+- Bregaglio21 drew Slowpoke.
+- Bregaglio21 shuffled their deck.
+Bregaglio21 played Slowpoke to the Bench.
+Bregaglio21 retreated Mega Kangaskhan ex to the Bench.
+Bregaglio21's Budew is now in the Active Spot.
+Bregaglio21's Budew used Itchy Pollen on Neurologist2024's Teal Mask Ogerpon ex for 10 damage.
+
+[playerName]'s Turn
+Neurologist2024 drew Basic Grass Energy.
+Neurologist2024's Teal Mask Ogerpon ex used Teal Dance.
+- Neurologist2024 attached Basic Grass Energy to Teal Mask Ogerpon ex in the Active Spot.
+- Neurologist2024 drew Basic Grass Energy.
+Neurologist2024 evolved Smoliv to Dolliv on the Bench.
+Neurologist2024 played Forest of Vitality to the Stadium spot.
+- Bregaglio21 discarded Academy at Night.
+Neurologist2024 attached Basic Grass Energy to Dolliv on the Bench.
+Neurologist2024's Teal Mask Ogerpon ex used Myriad Leaf Shower on Bregaglio21's Budew for 120 damage.
+- Damage breakdown:
+   • Base damage: 30 damage
+   • 3 attached Energy: 90 damage
+   • Total damage: 120 damage
+
+Bregaglio21's Budew was Knocked Out!
+Neurologist2024 took a Prize card.
+Lillie's Determination was added to Neurologist2024's hand.
+Bregaglio21's Mega Kangaskhan ex is now in the Active Spot.
+
+[playerName]'s Turn
+Bregaglio21 drew a card.
+Bregaglio21 played Night Stretcher.
+- Bregaglio21 moved Bregaglio21's Budew to their hand.
+Bregaglio21 played Budew to the Bench.
+Bregaglio21 played Ciphermaniac's Codebreaking.
+- Bregaglio21 shuffled their deck.
+Bregaglio21's Mega Kangaskhan ex used Run Errand.
+- Bregaglio21 drew 2 cards.
+Bregaglio21 evolved Slowpoke to Slowking on the Bench.
+Bregaglio21 attached Basic Psychic Energy to Slowking on the Bench.
+Bregaglio21 retreated Mega Kangaskhan ex to the Bench.
+Bregaglio21's Budew is now in the Active Spot.
+Bregaglio21's Budew used Itchy Pollen on Neurologist2024's Teal Mask Ogerpon ex for 10 damage.
+
+[playerName]'s Turn
+Neurologist2024 drew Basic Grass Energy.
+Neurologist2024's Teal Mask Ogerpon ex used Teal Dance.
+- Neurologist2024 attached Basic Grass Energy to Teal Mask Ogerpon ex in the Active Spot.
+- Neurologist2024 drew Tatsugiri.
+Neurologist2024 played Lillie's Determination.
+- Neurologist2024 shuffled 4 cards into their deck.
+   • Night Stretcher, Bayleef, Basic Grass Energy, Tatsugiri
+- Neurologist2024 drew 6 cards.
+   • Boss's Orders, Bayleef, Teal Mask Ogerpon ex, Bug Catching Set, Smoliv, Basic Grass Energy
+Neurologist2024 played Teal Mask Ogerpon ex to the Bench.
+Neurologist2024's Teal Mask Ogerpon ex used Teal Dance.
+- Neurologist2024 attached Basic Grass Energy to Teal Mask Ogerpon ex on the Bench.
+- Neurologist2024 drew Briar.
+Neurologist2024 played Smoliv to the Bench.
+Neurologist2024's Teal Mask Ogerpon ex used Myriad Leaf Shower on Bregaglio21's Budew for 150 damage.
+- Damage breakdown:
+   • Base damage: 30 damage
+   • 4 attached Energy: 120 damage
+   • Total damage: 150 damage
+
+Bregaglio21's Budew was Knocked Out!
+Neurologist2024 took a Prize card.
+Forest of Vitality was added to Neurologist2024's hand.
+Bregaglio21's Mega Kangaskhan ex is now in the Active Spot.
+
+[playerName]'s Turn
+Bregaglio21 drew a card.
+Bregaglio21's Mega Kangaskhan ex used Run Errand.
+- Bregaglio21 drew 2 cards.
+Bregaglio21 attached Basic Psychic Energy to Slowking on the Bench.
+Bregaglio21 played Lillie's Determination.
+- Bregaglio21 shuffled a card into their deck.
+- Bregaglio21 drew 8 cards.
+Bregaglio21 played Academy at Night to the Stadium spot.
+- Neurologist2024 discarded Forest of Vitality.
+Bregaglio21 retreated Mega Kangaskhan ex to the Bench.
+Bregaglio21's Slowking is now in the Active Spot.
+Bregaglio21 played Academy at Night.
+- Bregaglio21 put a card on top of their deck.
+Bregaglio21's Slowking used Seek Inspiration.
+- Bregaglio21 discarded Haxorus.
+- Bregaglio21 chose Axe Blast
+Neurologist2024's Teal Mask Ogerpon ex was Knocked Out!
+- 4 cards were discarded from Neurologist2024's Teal Mask Ogerpon ex.
+   • Basic Grass Energy, Basic Grass Energy, Basic Grass Energy, Basic Grass Energy
+Bregaglio21 took 2 Prize cards.
+A card was added to Bregaglio21's hand.
+A card was added to Bregaglio21's hand.
+Neurologist2024's Teal Mask Ogerpon ex is now in the Active Spot.
+
+[playerName]'s Turn
+Neurologist2024 drew Basic Grass Energy.
+Neurologist2024's Teal Mask Ogerpon ex used Teal Dance.
+- Neurologist2024 attached Basic Grass Energy to Teal Mask Ogerpon ex in the Active Spot.
+- Neurologist2024 drew Basic Grass Energy.
+Neurologist2024 played Bug Catching Set.
+- Neurologist2024 drew 2 cards.
+   • Arboliva ex, Basic Grass Energy
+- Neurologist2024 shuffled their deck.
+Neurologist2024 evolved Dolliv to Arboliva ex on the Bench.
+Neurologist2024 played Forest of Vitality to the Stadium spot.
+- Bregaglio21 discarded Academy at Night.
+Neurologist2024 attached Basic Grass Energy to Teal Mask Ogerpon ex in the Active Spot.
+Neurologist2024's Teal Mask Ogerpon ex used Myriad Leaf Shower on Bregaglio21's Slowking for 180 damage.
+- Damage breakdown:
+   • Base damage: 30 damage
+   • 5 attached Energy: 150 damage
+   • Total damage: 180 damage
+
+Bregaglio21's Slowking was Knocked Out!
+- 4 cards were discarded from Bregaglio21's Slowking.
+   • Basic Psychic Energy, Basic Psychic Energy, Slowpoke, Powerglass
+Neurologist2024 took a Prize card.
+Dawn was added to Neurologist2024's hand.
+Bregaglio21's Mega Kangaskhan ex is now in the Active Spot.
+
+[playerName]'s Turn
+Bregaglio21 drew a card.
+Bregaglio21 played Ciphermaniac's Codebreaking.
+- Bregaglio21 shuffled their deck.
+Bregaglio21's Mega Kangaskhan ex used Run Errand.
+- Bregaglio21 drew 2 cards.
+Bregaglio21 attached Basic Psychic Energy to Slowking on the Bench.
+Bregaglio21 played Wondrous Patch.
+- Bregaglio21 attached Basic Psychic Energy to Slowking on the Bench.
+Bregaglio21 played Secret Box.
+- Bregaglio21 discarded 3 cards.
+   • Latias ex, Nest Ball, Technical Machine: Devolution
+- Bregaglio21 drew 4 cards.
+   • Super Rod, Powerglass, Ciphermaniac's Codebreaking, Academy at Night
+- Bregaglio21 shuffled their deck.
+Bregaglio21 played Academy at Night to the Stadium spot.
+- Neurologist2024 discarded Forest of Vitality.
+Bregaglio21 retreated Mega Kangaskhan ex to the Bench.
+Bregaglio21's Slowking is now in the Active Spot.
+Bregaglio21 played Super Rod.
+- Bregaglio21 shuffled 3 cards into their deck.
+   • Haxorus, Basic Psychic Energy, Budew
+Bregaglio21 attached Powerglass to Slowking in the Active Spot.
+Bregaglio21 played Academy at Night.
+- Bregaglio21 put a card on top of their deck.
+Bregaglio21's Slowking used Seek Inspiration.
+- Bregaglio21 discarded Annihilape.
+- Bregaglio21 chose Destined Fight
+Neurologist2024's Teal Mask Ogerpon ex was Knocked Out!
+- 3 cards were discarded from Neurologist2024's Teal Mask Ogerpon ex.
+   • Basic Grass Energy, Basic Grass Energy, Basic Grass Energy
+Bregaglio21's Slowking was Knocked Out!
+- 4 cards were discarded from Bregaglio21's Slowking.
+   • Basic Psychic Energy, Basic Psychic Energy, Slowpoke, Powerglass
+Neurologist2024 took a Prize card.
+Lillie's Determination was added to Neurologist2024's hand.
+Bregaglio21 took 2 Prize cards.
+A card was added to Bregaglio21's hand.
+A card was added to Bregaglio21's hand.
+Neurologist2024's Arboliva ex is now in the Active Spot.
+Bregaglio21's Mega Kangaskhan ex is now in the Active Spot.
+
+[playerName]'s Turn
+Neurologist2024 drew Unfair Stamp.
+Neurologist2024 played Dawn.
+- Neurologist2024 drew 3 cards.
+   • Teal Mask Ogerpon ex, Dolliv, Arboliva ex
+- Neurologist2024 shuffled their deck.
+Neurologist2024 evolved Smoliv to Dolliv on the Bench.
+Neurologist2024 played Teal Mask Ogerpon ex to the Bench.
+Neurologist2024's Teal Mask Ogerpon ex used Teal Dance.
+- Neurologist2024 attached Basic Grass Energy to Teal Mask Ogerpon ex on the Bench.
+- Neurologist2024 drew Bug Catching Set.
+Neurologist2024 played Bug Catching Set.
+- Neurologist2024 drew Meganium.
+- Neurologist2024 shuffled their deck.
+Neurologist2024 played Unfair Stamp.
+- Neurologist2024 shuffled 6 cards into their deck.
+   • Boss's Orders, Bayleef, Briar, Lillie's Determination, Arboliva ex, Meganium
+- Neurologist2024 shuffled 6 cards into their deck.
+- Neurologist2024 drew 5 cards.
+   • Pokegear 3.0, Boss's Orders, Night Stretcher, Energy Switch, Bug Catching Set
+- Neurologist2024 drew 2 cards.
+Neurologist2024 played Bug Catching Set.
+- Neurologist2024 drew 2 cards.
+   • Arboliva ex, Basic Grass Energy
+- Neurologist2024 shuffled their deck.
+Neurologist2024 attached Basic Grass Energy to Dolliv on the Bench.
+Neurologist2024 played Pokegear 3.0.
+- Neurologist2024 drew Lillie's Determination.
+- Neurologist2024 shuffled their deck.
+Neurologist2024's Arboliva ex used Oil Salvo.
+Bregaglio21's Slowpoke took 120 damage.
+Bregaglio21's Slowpoke was Knocked Out!
+Neurologist2024 took a Prize card.
+Bug Catching Set was added to Neurologist2024's hand.
+
+[playerName]'s Turn
+Bregaglio21 drew a card.
+Bregaglio21 played Budew to the Bench.
+Bregaglio21 played Ciphermaniac's Codebreaking.
+- Bregaglio21 shuffled their deck.
+Bregaglio21's Mega Kangaskhan ex used Run Errand.
+- Bregaglio21 drew 2 cards.
+Bregaglio21 played Wondrous Patch.
+- Bregaglio21 attached Basic Psychic Energy to Latias ex on the Bench.
+Bregaglio21 attached Basic Psychic Energy to Mega Kangaskhan ex in the Active Spot.
+Bregaglio21 retreated Mega Kangaskhan ex to the Bench.
+Bregaglio21's Budew is now in the Active Spot.
+Bregaglio21's Budew used Itchy Pollen on Neurologist2024's Arboliva ex for 10 damage.
+
+[playerName]'s Turn
+Neurologist2024 drew Meganium.
+Neurologist2024 evolved Dolliv to Arboliva ex on the Bench.
+Neurologist2024 played Boss's Orders.
+- Bregaglio21's Mega Kangaskhan ex was switched with Bregaglio21's Budew to become the Active Pokemon.
+Bregaglio21's Mega Kangaskhan ex is now in the Active Spot.
+Neurologist2024's Arboliva ex used Oil Salvo.
+Bregaglio21's Budew took 120 damage.
+Bregaglio21's Budew was Knocked Out!
+Neurologist2024 took a Prize card.
+Lillie's Determination was added to Neurologist2024's hand.
+All Prize cards taken. Neurologist2024 wins.
