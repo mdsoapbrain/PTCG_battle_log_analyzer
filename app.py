@@ -1109,7 +1109,8 @@ def main() -> None:
 
     st.set_page_config(page_title="PTCG Live Battle Log Parser", layout="wide")
     st.title("PTCG Live Battle Log -> DB + Auto Summary")
-    st.caption("Player mapping fixed: Neurologist2024 = You, opponent = Opp")
+    you_name = st.text_input("Your PTCG Live Player Name", value=YOU_DEFAULT).strip() or YOU_DEFAULT
+    st.caption(f"Player mapping: {you_name} = You, opponent = Opp")
 
     col_a, col_b, col_c = st.columns(3)
     with col_a:
@@ -1142,7 +1143,7 @@ def main() -> None:
         if not battle_log.strip():
             st.warning("Please paste a battle log first.")
         else:
-            parsed = parse_log(battle_log, you_name=YOU_DEFAULT)
+            parsed = parse_log(battle_log, you_name=you_name)
             parsed["you_deck_name"] = you_deck_name.strip() or None
             parsed["opp_deck_name"] = opp_deck_name.strip() or None
             parsed["format_date"] = format_date.strip() or None
