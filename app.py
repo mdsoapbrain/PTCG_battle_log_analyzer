@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 import sqlite3
 import uuid
+import csv
+import io
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from typing import Any, Optional
@@ -28,6 +30,7 @@ SUPPORTER_HINTS = [
     "Arven",
     "Colress",
 ]
+ABILITY_MOVE_HINTS = ["Teal Dance"]
 
 
 def utc_now_iso() -> str:
@@ -115,6 +118,9 @@ def ensure_db(db_path: str = DB_PATH) -> None:
     ]:
         if col_def[0] not in game_cols:
             cur.execute(f"ALTER TABLE games ADD COLUMN {col_def[0]} {col_def[1]}")
+
+    # Backfill legacy rows to avoid first/second aggregation failures.
+    cur.execute("UPDATE games SET you_go_first = 1 WHERE you_go_first IS NULL")
 
     conn.commit()
     conn.close()
@@ -280,6 +286,8 @@ def parse_log(text: str, you_name: str = YOU_DEFAULT) -> dict[str, Any]:
 
             if "to the Stadium spot" in line:
                 add_event("stadium", f"{actor}: {card}")
+            elif "to the Bench" in line or "to the Active Spot" in line:
+                add_event("other", f"{actor}: {card}")
             elif "Boss's Orders" in card:
                 add_event("supporter", f"{actor}: {card}")
             elif any(hint in card for hint in SUPPORTER_HINTS):
@@ -312,8 +320,12 @@ def parse_log(text: str, you_name: str = YOU_DEFAULT) -> dict[str, Any]:
         m_attack = re.match(r"^([A-Za-z0-9_]+)'s (.+) used (.+)\.?$", line)
         if m_attack:
             atk_player, atk_pokemon, move_name = m_attack.groups()
+            move_name = move_name.rstrip(".").strip()
             actor = map_player(atk_player, you_name, opp_name)
-            add_event("attack", f"{actor}: {atk_pokemon} used {move_name}", pokemon_involved=atk_pokemon)
+            if move_name in ABILITY_MOVE_HINTS:
+                add_event("ability", f"{actor}: {atk_pokemon} used {move_name}", pokemon_involved=atk_pokemon)
+            else:
+                add_event("attack", f"{actor}: {atk_pokemon} used {move_name}", pokemon_involved=atk_pokemon)
             continue
 
         # Explicit damage line (some moves split to next line).
@@ -575,6 +587,8 @@ def render_timeline(parsed: dict[str, Any]) -> str:
             elif et == "attack":
                 dmg = f" ({event['damage']} damage)" if event.get("damage") is not None else ""
                 lines.append(f"- Attack: {event['detail_text']}{dmg}")
+            elif et == "ability":
+                lines.append(f"- Ability: {event['detail_text']}")
             elif et == "ko":
                 lines.append(f"- KO: {event['detail_text']}")
             elif et == "prize":
@@ -583,6 +597,8 @@ def render_timeline(parsed: dict[str, Any]) -> str:
                 )
             elif et == "item":
                 lines.append(f"- Key Event: {event['detail_text']}")
+            elif et == "other":
+                lines.append(f"- Board: {event['detail_text']}")
         for tp_text in tp_by_turn.get(turn["turn_index"], []):
             lines.append(f"- STAR Turning Point: {tp_text}")
         lines.append("")
@@ -629,7 +645,7 @@ def render_competitive_summary(parsed: dict[str, Any]) -> str:
             if end_t is not None and turn["turn_index"] > end_t:
                 continue
             for event in turn["events"]:
-                if event["event_type"] in {"supporter", "attack", "ko", "prize", "stadium", "evolve"}:
+                if event["event_type"] in {"supporter", "attack", "ability", "ko", "prize", "stadium", "evolve", "other"}:
                     snippets.append(f"T{turn['turn_index']}: {event['detail_text']}")
                 if len(snippets) >= 4:
                     break
@@ -760,9 +776,8 @@ def compute_stats(db_path: str) -> dict[str, Any]:
         """
         SELECT
             CASE
-                WHEN you_go_first = 1 THEN 'You go first'
                 WHEN you_go_first = 0 THEN 'You go second'
-                ELSE 'Unknown'
+                ELSE 'You go first'
             END AS bucket,
             COUNT(*) AS n,
             SUM(CASE WHEN winner='You' THEN 1 ELSE 0 END) AS wins,
@@ -815,7 +830,6 @@ def compute_stats(db_path: str) -> dict[str, Any]:
     first_second_map = {
         "You go first": {"n": 0, "wins": 0, "avg_turns": None, "avg_prize_diff": None},
         "You go second": {"n": 0, "wins": 0, "avg_turns": None, "avg_prize_diff": None},
-        "Unknown": {"n": 0, "wins": 0, "avg_turns": None, "avg_prize_diff": None},
     }
     for row in first_second:
         first_second_map[row["bucket"]] = {
@@ -875,13 +889,9 @@ def compute_stats(db_path: str) -> dict[str, Any]:
                 **first_second_map["You go second"],
                 "win_rate": pct(first_second_map["You go second"]["wins"], first_second_map["You go second"]["n"]),
             },
-            "Unknown": {
-                **first_second_map["Unknown"],
-                "win_rate": pct(first_second_map["Unknown"]["wins"], first_second_map["Unknown"]["n"]),
-            },
             "n_first": first_second_map["You go first"]["n"],
             "n_second": first_second_map["You go second"]["n"],
-            "n_unknown": first_second_map["Unknown"]["n"],
+            "n_unknown": 0,
         },
         "turning_point_types": [{"tp_type": row["tp_type"], "n": row["n"]} for row in tp_type_rows],
         "turning_point_state_winrate": [
@@ -918,6 +928,15 @@ def markdown_table(rows: list[dict[str, Any]], columns: list[tuple[str, str]]) -
     return "\n".join([headers, splitter] + body)
 
 
+def csv_bytes(rows: list[dict[str, Any]], columns: list[tuple[str, str]]) -> bytes:
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([title for _, title in columns])
+    for row in rows:
+        writer.writerow([row.get(key, "") for key, _ in columns])
+    return output.getvalue().encode("utf-8")
+
+
 def render_stats(stats: dict[str, Any]) -> None:
     st.subheader("Database Stats")
 
@@ -946,6 +965,22 @@ def render_stats(stats: dict[str, Any]) -> None:
             ],
         )
     )
+    st.download_button(
+        "Download Opp Deck Stats CSV",
+        data=csv_bytes(
+            stats["by_opp_deck"],
+            [
+                ("deck", "Opp Deck"),
+                ("n", "n"),
+                ("wins", "Wins"),
+                ("win_rate", "Win Rate %"),
+                ("avg_turns", "Avg Turns"),
+                ("avg_prize_diff", "Avg Prize Diff"),
+            ],
+        ),
+        file_name="stats_by_opp_deck.csv",
+        mime="text/csv",
+    )
 
     st.markdown("**Win Rate by You Deck Name**")
     st.markdown(
@@ -961,6 +996,22 @@ def render_stats(stats: dict[str, Any]) -> None:
             ],
         )
     )
+    st.download_button(
+        "Download You Deck Stats CSV",
+        data=csv_bytes(
+            stats["by_you_deck"],
+            [
+                ("deck", "You Deck"),
+                ("n", "n"),
+                ("wins", "Wins"),
+                ("win_rate", "Win Rate %"),
+                ("avg_turns", "Avg Turns"),
+                ("avg_prize_diff", "Avg Prize Diff"),
+            ],
+        ),
+        file_name="stats_by_you_deck.csv",
+        mime="text/csv",
+    )
 
     st.markdown("**Average Turns / Prize Diff by Matchup**")
     st.markdown(
@@ -975,6 +1026,21 @@ def render_stats(stats: dict[str, Any]) -> None:
             ],
         )
     )
+    st.download_button(
+        "Download Matchup Stats CSV",
+        data=csv_bytes(
+            stats["by_matchup"],
+            [
+                ("matchup", "Matchup"),
+                ("n", "n"),
+                ("win_rate", "Win Rate %"),
+                ("avg_turns", "Avg Turns"),
+                ("avg_prize_diff", "Avg Prize Diff"),
+            ],
+        ),
+        file_name="stats_by_matchup.csv",
+        mime="text/csv",
+    )
 
     fs = stats["first_second"]
     st.markdown("**First/Second Advantage**")
@@ -983,10 +1049,42 @@ def render_stats(stats: dict[str, Any]) -> None:
             [
                 f"- You go first: {fs['You go first']['win_rate']:.2f}% (n={fs['You go first']['n']}), avg turns {(fs['You go first']['avg_turns'] or 0):.2f}, avg prize diff {(fs['You go first']['avg_prize_diff'] or 0):.2f}",
                 f"- You go second: {fs['You go second']['win_rate']:.2f}% (n={fs['You go second']['n']}), avg turns {(fs['You go second']['avg_turns'] or 0):.2f}, avg prize diff {(fs['You go second']['avg_prize_diff'] or 0):.2f}",
-                f"- Unknown: {fs['Unknown']['win_rate']:.2f}% (n={fs['Unknown']['n']}), avg turns {(fs['Unknown']['avg_turns'] or 0):.2f}, avg prize diff {(fs['Unknown']['avg_prize_diff'] or 0):.2f}",
                 f"- Sample size split: n_first={fs['n_first']}, n_second={fs['n_second']}, n_unknown={fs['n_unknown']}",
             ]
         )
+    )
+    st.download_button(
+        "Download First/Second Stats CSV",
+        data=csv_bytes(
+            [
+                {
+                    "bucket": "You go first",
+                    "n": fs["You go first"]["n"],
+                    "wins": fs["You go first"]["wins"],
+                    "win_rate": fs["You go first"]["win_rate"],
+                    "avg_turns": fs["You go first"]["avg_turns"],
+                    "avg_prize_diff": fs["You go first"]["avg_prize_diff"],
+                },
+                {
+                    "bucket": "You go second",
+                    "n": fs["You go second"]["n"],
+                    "wins": fs["You go second"]["wins"],
+                    "win_rate": fs["You go second"]["win_rate"],
+                    "avg_turns": fs["You go second"]["avg_turns"],
+                    "avg_prize_diff": fs["You go second"]["avg_prize_diff"],
+                },
+            ],
+            [
+                ("bucket", "Bucket"),
+                ("n", "n"),
+                ("wins", "Wins"),
+                ("win_rate", "Win Rate %"),
+                ("avg_turns", "Avg Turns"),
+                ("avg_prize_diff", "Avg Prize Diff"),
+            ],
+        ),
+        file_name="stats_first_second.csv",
+        mime="text/csv",
     )
 
     st.markdown("**Key Turning Points Summary**")
