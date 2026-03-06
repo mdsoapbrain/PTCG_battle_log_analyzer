@@ -31,6 +31,11 @@ SUPPORTER_HINTS = [
     "Colress",
 ]
 ABILITY_MOVE_HINTS = ["Teal Dance"]
+WIN_LINE_PATTERNS = [
+    re.compile(r"All Prize cards taken\. ([A-Za-z0-9_]+) wins\.?"),
+    re.compile(r"(?:[A-Za-z0-9_]+|Opponent) was inactive for too long\. ([A-Za-z0-9_]+) wins\.?"),
+    re.compile(r"([A-Za-z0-9_]+) conceded\. ([A-Za-z0-9_]+) wins\.?"),
+]
 
 
 def utc_now_iso() -> str:
@@ -264,9 +269,16 @@ def parse_log(text: str, you_name: str = YOU_DEFAULT) -> dict[str, Any]:
             continue
 
         # Winner line.
-        m_win = re.match(r"All Prize cards taken\. ([A-Za-z0-9_]+) wins\.?", line)
-        if m_win:
-            winner = map_player(m_win.group(1), you_name, opp_name)
+        matched_win = None
+        for win_pat in WIN_LINE_PATTERNS:
+            m_win = win_pat.match(line)
+            if m_win:
+                matched_win = m_win
+                break
+        if matched_win:
+            winner = map_player(matched_win.group(1), you_name, opp_name)
+            if current_turn is not None:
+                add_event("other", f"Game End: {line}")
 
         if current_turn is None:
             continue
@@ -576,29 +588,41 @@ def render_timeline(parsed: dict[str, Any]) -> str:
     for turn in parsed["turns"]:
         active = turn["active_player"] or "Unknown"
         lines.append(f"Turn {turn['turn_index']} - {active}")
+        had_key_line = False
         for event in turn["events"]:
             et = event["event_type"]
             if et == "supporter":
                 lines.append(f"- Supporter: {event['detail_text']}")
+                had_key_line = True
             elif et == "stadium":
                 lines.append(f"- Stadium: {event['detail_text']}")
+                had_key_line = True
             elif et == "evolve":
                 lines.append(f"- Evolution: {event['detail_text']}")
+                had_key_line = True
             elif et == "attack":
                 dmg = f" ({event['damage']} damage)" if event.get("damage") is not None else ""
                 lines.append(f"- Attack: {event['detail_text']}{dmg}")
+                had_key_line = True
             elif et == "ability":
                 lines.append(f"- Ability: {event['detail_text']}")
+                had_key_line = True
             elif et == "ko":
                 lines.append(f"- KO: {event['detail_text']}")
+                had_key_line = True
             elif et == "prize":
                 lines.append(
                     f"- Prize: {event['detail_text']} (Total: You {event['score_you']} - Opp {event['score_opp']})"
                 )
+                had_key_line = True
             elif et == "item":
                 lines.append(f"- Key Event: {event['detail_text']}")
+                had_key_line = True
             elif et == "other":
                 lines.append(f"- Board: {event['detail_text']}")
+                had_key_line = True
+        if not had_key_line:
+            lines.append("- No key events captured.")
         for tp_text in tp_by_turn.get(turn["turn_index"], []):
             lines.append(f"- STAR Turning Point: {tp_text}")
         lines.append("")
