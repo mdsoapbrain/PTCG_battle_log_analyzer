@@ -772,6 +772,46 @@ def compute_stats(db_path: str) -> dict[str, Any]:
         """
     ).fetchall()
 
+    by_you_deck_first_second = cur.execute(
+        """
+        SELECT
+            COALESCE(NULLIF(you_deck_name, ''), 'Unknown') AS you_deck,
+            CASE
+                WHEN you_go_first = 0 THEN 'Second'
+                ELSE 'First'
+            END AS turn_order,
+            COUNT(*) AS n,
+            SUM(CASE WHEN winner='You' THEN 1 ELSE 0 END) AS wins,
+            AVG(total_turns) AS avg_turns,
+            AVG(you_prize_taken - opp_prize_taken) AS avg_prize_diff
+        FROM games
+        GROUP BY COALESCE(NULLIF(you_deck_name, ''), 'Unknown'), turn_order
+        ORDER BY you_deck, turn_order
+        """
+    ).fetchall()
+
+    by_matchup_first_second = cur.execute(
+        """
+        SELECT
+            COALESCE(NULLIF(you_deck_name, ''), 'Unknown') AS you_deck,
+            COALESCE(NULLIF(opp_deck_name, ''), 'Unknown') AS opp_deck,
+            CASE
+                WHEN you_go_first = 0 THEN 'Second'
+                ELSE 'First'
+            END AS turn_order,
+            COUNT(*) AS n,
+            SUM(CASE WHEN winner='You' THEN 1 ELSE 0 END) AS wins,
+            AVG(total_turns) AS avg_turns,
+            AVG(you_prize_taken - opp_prize_taken) AS avg_prize_diff
+        FROM games
+        GROUP BY
+            COALESCE(NULLIF(you_deck_name, ''), 'Unknown'),
+            COALESCE(NULLIF(opp_deck_name, ''), 'Unknown'),
+            turn_order
+        ORDER BY n DESC
+        """
+    ).fetchall()
+
     first_second = cur.execute(
         """
         SELECT
@@ -871,6 +911,8 @@ def compute_stats(db_path: str) -> dict[str, Any]:
         ],
         "by_matchup": [
             {
+                "you_deck": row["you_deck"],
+                "opp_deck": row["opp_deck"],
                 "matchup": f"{row['you_deck']} vs {row['opp_deck']}",
                 "n": row["n"],
                 "wins": row["wins"] or 0,
@@ -879,6 +921,31 @@ def compute_stats(db_path: str) -> dict[str, Any]:
                 "avg_prize_diff": row["avg_prize_diff"],
             }
             for row in by_matchup
+        ],
+        "by_you_deck_first_second": [
+            {
+                "you_deck": row["you_deck"],
+                "turn_order": row["turn_order"],
+                "n": row["n"],
+                "wins": row["wins"] or 0,
+                "win_rate": pct(row["wins"] or 0, row["n"]),
+                "avg_turns": row["avg_turns"],
+                "avg_prize_diff": row["avg_prize_diff"],
+            }
+            for row in by_you_deck_first_second
+        ],
+        "by_matchup_first_second": [
+            {
+                "you_deck": row["you_deck"],
+                "opp_deck": row["opp_deck"],
+                "turn_order": row["turn_order"],
+                "n": row["n"],
+                "wins": row["wins"] or 0,
+                "win_rate": pct(row["wins"] or 0, row["n"]),
+                "avg_turns": row["avg_turns"],
+                "avg_prize_diff": row["avg_prize_diff"],
+            }
+            for row in by_matchup_first_second
         ],
         "first_second": {
             "You go first": {
@@ -939,24 +1006,22 @@ def csv_bytes(rows: list[dict[str, Any]], columns: list[tuple[str, str]]) -> byt
 
 def render_stats(stats: dict[str, Any]) -> None:
     st.subheader("Database Stats")
+    min_sample = st.number_input("Minimum sample size (n)", min_value=1, max_value=9999, value=1, step=1)
 
     overall = stats["overall"]
-    st.markdown(
-        "\n".join(
-            [
-                f"- Overall Win Rate (You): **{overall['win_rate']:.2f}%** (n={overall['n']})",
-                f"- Average total turns: **{(overall['avg_turns'] or 0):.2f}**",
-                f"- Average prize differential (You-Opp): **{(overall['avg_prize_diff'] or 0):.2f}**",
-            ]
-        )
-    )
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Overall Win Rate", f"{overall['win_rate']:.2f}%", f"n={overall['n']}")
+    m2.metric("Avg Turns", f"{(overall['avg_turns'] or 0):.2f}")
+    m3.metric("Avg Prize Diff (You-Opp)", f"{(overall['avg_prize_diff'] or 0):.2f}")
 
-    st.markdown("**Win Rate by Opp Deck Name (Top 10)**")
+    st.markdown("**Matchup Win Rate (You Deck vs Opp Deck)**")
+    matchup_rows = [r for r in stats["by_matchup"] if r["n"] >= min_sample]
     st.markdown(
         markdown_table(
-            stats["by_opp_deck"],
+            matchup_rows,
             [
-                ("deck", "Opp Deck"),
+                ("you_deck", "You Deck"),
+                ("opp_deck", "Opp Deck"),
                 ("n", "n"),
                 ("wins", "Wins"),
                 ("win_rate", "Win Rate %"),
@@ -966,11 +1031,12 @@ def render_stats(stats: dict[str, Any]) -> None:
         )
     )
     st.download_button(
-        "Download Opp Deck Stats CSV",
+        "Download Matchup Win Rate CSV",
         data=csv_bytes(
-            stats["by_opp_deck"],
+            matchup_rows,
             [
-                ("deck", "Opp Deck"),
+                ("you_deck", "You Deck"),
+                ("opp_deck", "Opp Deck"),
                 ("n", "n"),
                 ("wins", "Wins"),
                 ("win_rate", "Win Rate %"),
@@ -978,14 +1044,15 @@ def render_stats(stats: dict[str, Any]) -> None:
                 ("avg_prize_diff", "Avg Prize Diff"),
             ],
         ),
-        file_name="stats_by_opp_deck.csv",
+        file_name="stats_matchup_win_rate.csv",
         mime="text/csv",
     )
 
-    st.markdown("**Win Rate by You Deck Name**")
+    st.markdown("**Your Deck Overall Win Rate**")
+    deck_rows = [r for r in stats["by_you_deck"] if r["n"] >= min_sample]
     st.markdown(
         markdown_table(
-            stats["by_you_deck"],
+            deck_rows,
             [
                 ("deck", "You Deck"),
                 ("n", "n"),
@@ -999,7 +1066,7 @@ def render_stats(stats: dict[str, Any]) -> None:
     st.download_button(
         "Download You Deck Stats CSV",
         data=csv_bytes(
-            stats["by_you_deck"],
+            deck_rows,
             [
                 ("deck", "You Deck"),
                 ("n", "n"),
@@ -1013,37 +1080,8 @@ def render_stats(stats: dict[str, Any]) -> None:
         mime="text/csv",
     )
 
-    st.markdown("**Average Turns / Prize Diff by Matchup**")
-    st.markdown(
-        markdown_table(
-            stats["by_matchup"],
-            [
-                ("matchup", "Matchup"),
-                ("n", "n"),
-                ("win_rate", "Win Rate %"),
-                ("avg_turns", "Avg Turns"),
-                ("avg_prize_diff", "Avg Prize Diff"),
-            ],
-        )
-    )
-    st.download_button(
-        "Download Matchup Stats CSV",
-        data=csv_bytes(
-            stats["by_matchup"],
-            [
-                ("matchup", "Matchup"),
-                ("n", "n"),
-                ("win_rate", "Win Rate %"),
-                ("avg_turns", "Avg Turns"),
-                ("avg_prize_diff", "Avg Prize Diff"),
-            ],
-        ),
-        file_name="stats_by_matchup.csv",
-        mime="text/csv",
-    )
-
+    st.markdown("**First/Second Advantage (Overall)**")
     fs = stats["first_second"]
-    st.markdown("**First/Second Advantage**")
     st.markdown(
         "\n".join(
             [
@@ -1084,6 +1122,123 @@ def render_stats(stats: dict[str, Any]) -> None:
             ],
         ),
         file_name="stats_first_second.csv",
+        mime="text/csv",
+    )
+
+    st.markdown("**Matchup First/Second Split**")
+    matchup_options = sorted({(r["you_deck"], r["opp_deck"]) for r in stats["by_matchup"]})
+    if matchup_options:
+        default_matchup = matchup_options[0]
+        matchup_label_map = {f"{a} vs {b}": (a, b) for a, b in matchup_options}
+        selected_label = st.selectbox("Select matchup", list(matchup_label_map.keys()))
+        selected_you, selected_opp = matchup_label_map[selected_label]
+        matchup_fs_rows = [
+            r
+            for r in stats["by_matchup_first_second"]
+            if r["you_deck"] == selected_you and r["opp_deck"] == selected_opp and r["n"] >= min_sample
+        ]
+        st.markdown(
+            markdown_table(
+                matchup_fs_rows,
+                [
+                    ("you_deck", "You Deck"),
+                    ("opp_deck", "Opp Deck"),
+                    ("turn_order", "First/Second"),
+                    ("n", "n"),
+                    ("wins", "Wins"),
+                    ("win_rate", "Win Rate %"),
+                    ("avg_turns", "Avg Turns"),
+                    ("avg_prize_diff", "Avg Prize Diff"),
+                ],
+            )
+        )
+        st.download_button(
+            "Download Selected Matchup First/Second CSV",
+            data=csv_bytes(
+                matchup_fs_rows,
+                [
+                    ("you_deck", "You Deck"),
+                    ("opp_deck", "Opp Deck"),
+                    ("turn_order", "First/Second"),
+                    ("n", "n"),
+                    ("wins", "Wins"),
+                    ("win_rate", "Win Rate %"),
+                    ("avg_turns", "Avg Turns"),
+                    ("avg_prize_diff", "Avg Prize Diff"),
+                ],
+            ),
+            file_name="stats_selected_matchup_first_second.csv",
+            mime="text/csv",
+        )
+
+    st.markdown("**Your Deck First/Second Split**")
+    your_deck_options = sorted({r["deck"] for r in stats["by_you_deck"]})
+    if your_deck_options:
+        selected_deck = st.selectbox("Select your deck", your_deck_options)
+        deck_fs_rows = [
+            r for r in stats["by_you_deck_first_second"] if r["you_deck"] == selected_deck and r["n"] >= min_sample
+        ]
+        st.markdown(
+            markdown_table(
+                deck_fs_rows,
+                [
+                    ("you_deck", "You Deck"),
+                    ("turn_order", "First/Second"),
+                    ("n", "n"),
+                    ("wins", "Wins"),
+                    ("win_rate", "Win Rate %"),
+                    ("avg_turns", "Avg Turns"),
+                    ("avg_prize_diff", "Avg Prize Diff"),
+                ],
+            )
+        )
+        st.download_button(
+            "Download Selected Deck First/Second CSV",
+            data=csv_bytes(
+                deck_fs_rows,
+                [
+                    ("you_deck", "You Deck"),
+                    ("turn_order", "First/Second"),
+                    ("n", "n"),
+                    ("wins", "Wins"),
+                    ("win_rate", "Win Rate %"),
+                    ("avg_turns", "Avg Turns"),
+                    ("avg_prize_diff", "Avg Prize Diff"),
+                ],
+            ),
+            file_name="stats_selected_deck_first_second.csv",
+            mime="text/csv",
+        )
+
+    st.markdown("**Win Rate by Opp Deck Name (Top 10)**")
+    opp_rows = [r for r in stats["by_opp_deck"] if r["n"] >= min_sample]
+    st.markdown(
+        markdown_table(
+            opp_rows,
+            [
+                ("deck", "Opp Deck"),
+                ("n", "n"),
+                ("wins", "Wins"),
+                ("win_rate", "Win Rate %"),
+                ("avg_turns", "Avg Turns"),
+                ("avg_prize_diff", "Avg Prize Diff"),
+            ],
+        )
+    )
+    st.download_button(
+        "Download Matchup Stats CSV",
+        data=csv_bytes(
+            opp_rows,
+            [
+                ("deck", "Opp Deck"),
+                ("n", "n"),
+                ("wins", "Wins"),
+                ("win_rate", "Win Rate %"),
+                ("avg_turns", "Avg Turns"),
+                ("avg_prize_diff", "Avg Prize Diff"),
+            ],
+        ),
+        file_name="stats_by_opp_deck.csv",
         mime="text/csv",
     )
 
