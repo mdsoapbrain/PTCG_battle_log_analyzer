@@ -54,6 +54,32 @@ streamlit run app.py
   - `Generate Summary Only` (no DB write)
   - `Parse & Save` (save into SQLite)
 
+## New to Streamlit?
+
+Streamlit is a Python tool that turns your script into a local web app.
+
+### Basic commands
+
+Install:
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+Run:
+```bash
+streamlit run app.py
+```
+
+Stop:
+- Press `Ctrl + C` in the terminal
+
+### If `streamlit: command not found`
+
+Run Streamlit with Python module mode:
+```bash
+python3 -m streamlit run app.py
+```
+
 ## Database behavior
 
 ### Local machine
