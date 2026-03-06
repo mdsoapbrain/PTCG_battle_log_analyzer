@@ -34,6 +34,15 @@ Player mapping is fixed:
 
 ## Quick Start (Local)
 
+### Clone and run
+
+```bash
+git clone https://github.com/mdsoapbrain/PTCG_battle_log_analyzer.git
+cd PTCG_battle_log_analyzer
+python3 -m pip install -r requirements.txt
+python3 -m streamlit run app.py
+```
+
 ### 1) Install Python packages
 
 ```bash
