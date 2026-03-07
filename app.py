@@ -46,6 +46,14 @@ def normalize_text(text: str) -> str:
     return text.replace("\u2019", "'").replace("\u2018", "'")
 
 
+def extract_winner_name(line: str) -> Optional[str]:
+    """Detect game-end lines and always return the winner at sentence end."""
+    if not any(pat.match(line) for pat in WIN_LINE_PATTERNS):
+        return None
+    m = re.search(r"([A-Za-z0-9_]+) wins\.?$", line)
+    return m.group(1) if m else None
+
+
 def ensure_db(db_path: str = DB_PATH) -> None:
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
@@ -126,6 +134,23 @@ def ensure_db(db_path: str = DB_PATH) -> None:
 
     # Backfill legacy rows to avoid first/second aggregation failures.
     cur.execute("UPDATE games SET you_go_first = 1 WHERE you_go_first IS NULL")
+
+    # Repair historical winner values from stored game-end event lines.
+    rows = cur.execute(
+        """
+        SELECT g.game_id, g.you_name, g.opp_name, g.winner, e.detail_text
+        FROM games g
+        JOIN events e ON g.game_id = e.game_id
+        WHERE e.detail_text LIKE 'Game End:%wins.%'
+        """
+    ).fetchall()
+    for game_id, you_name, opp_name, winner, detail_text in rows:
+        winner_name = extract_winner_name(normalize_text(detail_text.replace("Game End: ", "").strip()))
+        if not winner_name:
+            continue
+        fixed_winner = "You" if winner_name == you_name else ("Opp" if winner_name == opp_name else None)
+        if fixed_winner and fixed_winner != winner:
+            cur.execute("UPDATE games SET winner = ? WHERE game_id = ?", (fixed_winner, game_id))
 
     conn.commit()
     conn.close()
@@ -269,14 +294,9 @@ def parse_log(text: str, you_name: str = YOU_DEFAULT) -> dict[str, Any]:
             continue
 
         # Winner line.
-        matched_win = None
-        for win_pat in WIN_LINE_PATTERNS:
-            m_win = win_pat.match(line)
-            if m_win:
-                matched_win = m_win
-                break
-        if matched_win:
-            winner = map_player(matched_win.group(1), you_name, opp_name)
+        winner_name = extract_winner_name(line)
+        if winner_name:
+            winner = map_player(winner_name, you_name, opp_name)
             if current_turn is not None:
                 add_event("other", f"Game End: {line}")
 
