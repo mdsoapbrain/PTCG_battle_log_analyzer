@@ -5,6 +5,7 @@ import sqlite3
 import uuid
 import csv
 import io
+import os
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from typing import Any, Optional
@@ -316,9 +317,10 @@ def parse_log(text: str, you_name: str = YOU_DEFAULT) -> dict[str, Any]:
             if current_turn["active_player"] is None and actor in ("You", "Opp"):
                 current_turn["active_player"] = actor
 
-            if "to the Stadium spot" in line:
+            line_lower = line.lower()
+            if "to the stadium spot" in line_lower:
                 add_event("stadium", f"{actor}: {card}")
-            elif "to the Bench" in line or "to the Active Spot" in line:
+            elif "to the bench" in line_lower or "to the active spot" in line_lower or "to become the active pokemon" in line_lower:
                 add_event("other", f"{actor}: {card}")
             elif "Boss's Orders" in card:
                 add_event("supporter", f"{actor}: {card}")
@@ -326,6 +328,13 @@ def parse_log(text: str, you_name: str = YOU_DEFAULT) -> dict[str, Any]:
                 add_event("supporter", f"{actor}: {card}")
             elif any(k in card for k in KEY_RESOURCE_CARDS):
                 add_event("item", f"{actor}: {card}")
+            continue
+
+        m_now_active = re.match(r"^([A-Za-z0-9_]+)'s (.+) is now in the Active Spot\.$", line)
+        if m_now_active:
+            actor_name, pokemon = m_now_active.groups()
+            actor = map_player(actor_name, you_name, opp_name)
+            add_event("other", f"{actor}: {pokemon} moved to Active Spot", pokemon_involved=pokemon)
             continue
 
         # Evolution line.
@@ -1320,6 +1329,18 @@ def main() -> None:
         format_date = st.text_input("Format/Date", value="")
 
     notes = st.text_input("Notes (optional)", value="")
+    reset_col1, reset_col2 = st.columns([2, 1])
+    with reset_col1:
+        confirm_reset = st.checkbox("I understand reset will delete all saved games")
+    with reset_col2:
+        if st.button("Reset DB", use_container_width=True):
+            if confirm_reset:
+                if os.path.exists(DB_PATH):
+                    os.remove(DB_PATH)
+                ensure_db(DB_PATH)
+                st.success("Database reset complete.")
+            else:
+                st.warning("Please check the confirmation box before reset.")
 
     default_log = ""
     try:
@@ -1354,7 +1375,14 @@ def main() -> None:
 
     if parsed:
         st.subheader("A) Turn Timeline")
-        st.markdown(render_timeline(parsed))
+        timeline_text = render_timeline(parsed)
+        st.markdown(timeline_text)
+        st.download_button(
+            "Save Timeline as TXT",
+            data=timeline_text.encode("utf-8"),
+            file_name="turn_timeline.txt",
+            mime="text/plain",
+        )
 
         st.subheader("B) KO + Prize Tracker")
         st.markdown(render_prize_table(parsed))
