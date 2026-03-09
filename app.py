@@ -36,6 +36,7 @@ WIN_LINE_PATTERNS = [
     re.compile(r"All Prize cards taken\. ([A-Za-z0-9_]+) wins\.?"),
     re.compile(r"(?:[A-Za-z0-9_]+|Opponent) was inactive for too long\. ([A-Za-z0-9_]+) wins\.?"),
     re.compile(r"([A-Za-z0-9_]+) conceded\. ([A-Za-z0-9_]+) wins\.?"),
+    re.compile(r"No Benched Pokemon for backup\. ([A-Za-z0-9_]+) wins\.?"),
 ]
 
 
@@ -44,7 +45,11 @@ def utc_now_iso() -> str:
 
 
 def normalize_text(text: str) -> str:
-    return text.replace("\u2019", "'").replace("\u2018", "'")
+    return (
+        text.replace("\u2019", "'")
+        .replace("\u2018", "'")
+        .replace("\u00e9", "e")
+    )
 
 
 def extract_winner_name(line: str) -> Optional[str]:
