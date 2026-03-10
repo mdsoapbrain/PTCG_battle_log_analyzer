@@ -1,0 +1,14 @@
+.git
+.github
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.venv
+venv
+.env
+.env.*
+ptcg_logs.db
+backend.db
+alembic/versions/__pycache__

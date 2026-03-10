@@ -1,1 +1,8 @@
 streamlit
+fastapi
+uvicorn[standard]
+sqlalchemy
+alembic
+psycopg[binary]
+pytest
+httpx

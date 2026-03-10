@@ -1,5 +1,8 @@
 __pycache__/
 *.pyc
 ptcg_logs.db
+backend.db
 .env
 .DS_Store
+.venv/
+.pytest_cache/

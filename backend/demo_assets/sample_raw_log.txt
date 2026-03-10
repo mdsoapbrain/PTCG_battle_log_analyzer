@@ -1,0 +1,16 @@
+Setup
+Rival123 won the coin toss.
+Rival123 decided to go first.
+Rival123 played Charmander to the Active Spot.
+Neurologist2024 played Teal Mask Ogerpon ex to the Active Spot.
+
+[playerName]'s Turn
+Rival123 drew a card.
+Rival123 ended their turn.
+
+[playerName]'s Turn
+Neurologist2024 drew a card.
+Neurologist2024's Teal Mask Ogerpon ex used Teal Dance.
+Rival123's Charmander was Knocked Out!
+Neurologist2024 took a Prize card.
+No Benched Pokémon for backup. Neurologist2024 wins.
