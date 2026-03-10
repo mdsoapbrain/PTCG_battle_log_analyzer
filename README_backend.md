@@ -104,6 +104,14 @@ docker run --env-file .env -p 8001:8001 ptcg-backend
 docker compose up --build
 ```
 
+## Render deployment (quick path)
+
+1. Open Render Dashboard -> `New` -> `Blueprint`
+2. Connect this GitHub repo
+3. Render will detect [`render.yaml`](/Users/danny/Desktop/pokemon_calculator/ptcg-consistency/render.yaml)
+4. Set `API_BASE_URL` and `CORS_ALLOWED_ORIGINS` in the Render UI
+5. Deploy
+
 ## API contract
 
 All endpoints return a standard envelope:
