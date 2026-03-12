@@ -1,129 +1,79 @@
-# PTCG Battle Log Analyzer (Streamlit)
+# PTCG Battle Log Analyzer (Backend + Frontend)
 
-A simple app to parse **PTCG Live battle logs**, generate match summaries, and save games into a SQLite database for long-term stats.
+This repository now contains both:
 
-Player mapping is fixed:
-- `Neurologist2024` = **You**
-- other player = **Opp**
+- `backend/` FastAPI API (parser, storage, stats)
+- `frontend/` React + Vite web app (dashboard, parse/save UI)
 
-## What this app does
+Parser/business logic remains in Python.
 
-- Paste one battle log
-- Parse turns and key actions
-- Track KO + Prize events
-- Detect up to 2 turning points:
-  - biggest prize swing turn
-  - first KO on a Pokemon with `ex` in the name
-- Generate 3 markdown outputs:
-  - Turn Timeline
-  - KO + Prize Tracker table
-  - Competitive Summary Template
-- Save game + events to `ptcg_logs.db`
-- Show database dashboard stats:
-  - Overall win rate
-  - Win rate by opp deck / your deck
-  - Avg turns / avg prize differential
-  - Go first vs go second advantage
+## Repo Structure
 
-## Files
+```text
+backend/      # FastAPI app
+frontend/     # React app
+alembic/      # DB migrations
+scripts/      # seed/demo scripts
+tests/        # backend tests
+app.py        # legacy Streamlit app (optional)
+```
 
-- `app.py` - main Streamlit app (single file)
-- `sample_log.txt` - sample PTCG Live battle log
-- `requirements.txt` - Python dependencies
-- `ptcg_logs.db` - local SQLite database (auto-created)
-
-## Quick Start (Local)
-
-### Clone and run
+## Quick Start (Clone and run)
 
 ```bash
 git clone https://github.com/mdsoapbrain/PTCG_battle_log_analyzer.git
 cd PTCG_battle_log_analyzer
-python3 -m pip install -r requirements.txt
-python3 -m streamlit run app.py
 ```
 
-### 1) Install Python packages
+### 1) Run backend
 
 ```bash
-python3 -m pip install -r requirements.txt
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
+python -m pip install -r requirements.txt
+cp .env.example .env
+uvicorn backend.main:app --reload --host 0.0.0.0 --port 8001
 ```
 
-### 2) Run app
+Backend docs:
+- [http://localhost:8001/docs](http://localhost:8001/docs)
+
+### 2) Run frontend
+
+Open a second terminal:
+
+```bash
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
+```
+
+Frontend URL:
+- [http://localhost:8080](http://localhost:8080)
+
+## Production URLs (current)
+
+- API base: [https://ptcg-backend-7jos.onrender.com](https://ptcg-backend-7jos.onrender.com)
+- Docs: [https://ptcg-backend-7jos.onrender.com/docs](https://ptcg-backend-7jos.onrender.com/docs)
+- OpenAPI: [https://ptcg-backend-7jos.onrender.com/openapi.json](https://ptcg-backend-7jos.onrender.com/openapi.json)
+
+## Frontend/Backend Contract
+
+- Contract doc: [FRONTEND_INTEGRATION.md](/Users/danny/Desktop/pokemon_calculator/ptcg-consistency/FRONTEND_INTEGRATION.md)
+- Backend run/deploy doc: [README_backend.md](/Users/danny/Desktop/pokemon_calculator/ptcg-consistency/README_backend.md)
+
+## Auth (current)
+
+- `AUTH_MODE=stub`
+- Bearer token is optional
+- Dev token format recommended: `Authorization: Bearer user:<id>`
+
+## Legacy Streamlit (optional)
+
+If you still want the single-file Streamlit version:
 
 ```bash
 streamlit run app.py
 ```
-
-### 3) Use the UI
-
-- Paste log in textarea (or use preloaded sample)
-- Optional: fill deck names and format/date
-- Click:
-  - `Generate Summary Only` (no DB write)
-  - `Parse & Save` (save into SQLite)
-
-## New to Streamlit?
-
-Streamlit is a Python tool that turns your script into a local web app.
-
-### Basic commands
-
-Install:
-```bash
-python3 -m pip install -r requirements.txt
-```
-
-Run:
-```bash
-streamlit run app.py
-```
-
-Stop:
-- Press `Ctrl + C` in the terminal
-
-### If `streamlit: command not found`
-
-Run Streamlit with Python module mode:
-```bash
-python3 -m streamlit run app.py
-```
-
-## Database behavior
-
-### Local machine
-
-`ptcg_logs.db` is a normal file in this folder.
-- Closing Streamlit does **not** delete data
-- Reopening app continues from same DB
-
-### Streamlit Community Cloud
-
-Cloud local files are **not guaranteed permanent**.
-- Data may reset on restart/redeploy
-- For long-term storage, use external DB (Postgres/Supabase/Neon) or export backups
-
-## Deploy on Streamlit Community Cloud (for your own copy)
-
-This is the recommended way for public sharing: each user deploys from their own GitHub repo.
-
-1. Fork this repository to your GitHub account
-2. Open [Streamlit Community Cloud](https://share.streamlit.io)
-3. Click **New app**
-4. Select your forked repo
-5. Branch: `main`
-6. Main file path: `app.py`
-7. Deploy
-
-## Common issue
-
-### "App code is not connected to a remote GitHub repository"
-
-Your local folder is not enough for Streamlit Cloud.
-You must push code to GitHub first, then deploy from that repo.
-
-## Notes
-
-- Parser is regex + state machine (no heavy NLP)
-- Works best with English PTCG Live logs
-- If `decided to go first` is missing, first/second is stored as `Unknown`
