@@ -34,6 +34,27 @@ npm run build
 npm run preview
 ```
 
+## Deploy (Vercel)
+
+1. Import this repo in Vercel
+2. Set project root to `frontend`
+3. Add env var:
+   - `VITE_API_BASE_URL=https://ptcg-backend-7jos.onrender.com`
+4. Deploy
+
+SPA routing is already configured via [`vercel.json`](/Users/danny/Desktop/pokemon_calculator/ptcg-consistency/frontend/vercel.json).
+
+## Deploy (Netlify)
+
+1. Import this repo in Netlify
+2. Set base directory to `frontend`
+3. Build command: `npm run build`
+4. Publish directory: `frontend/dist`
+5. Add env var:
+   - `VITE_API_BASE_URL=https://ptcg-backend-7jos.onrender.com`
+
+SPA routing is already configured via [`netlify.toml`](/Users/danny/Desktop/pokemon_calculator/ptcg-consistency/frontend/netlify.toml).
+
 ## Current pages
 
 - Dashboard
