@@ -27,6 +27,7 @@ class Settings:
     database_url: str
     api_prefix: str
     cors_allowed_origins: list[str]
+    cors_allowed_origin_regex: str | None
     api_base_url: str
     secret_key: str
     auth_mode: str
@@ -41,6 +42,7 @@ def get_settings() -> Settings:
         app_port = 8001
 
     cors_raw = _env("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173")
+    cors_regex_raw = _env("CORS_ALLOWED_ORIGIN_REGEX", r"https://.*\.vercel\.app")
 
     return Settings(
         app_name=_env_with_fallback("APP_NAME", "PTCG_APP_NAME", "PTCG Battle Log Backend"),
@@ -51,6 +53,7 @@ def get_settings() -> Settings:
         database_url=_env_with_fallback("DATABASE_URL", "PTCG_DATABASE_URL", "sqlite:///./backend.db"),
         api_prefix=_env_with_fallback("API_PREFIX", "PTCG_API_PREFIX", ""),
         cors_allowed_origins=_parse_csv(cors_raw),
+        cors_allowed_origin_regex=cors_regex_raw.strip() or None,
         api_base_url=_env("API_BASE_URL", "http://localhost:8001"),
         secret_key=_env("SECRET_KEY", "change-me"),
         auth_mode=_env("AUTH_MODE", "stub"),

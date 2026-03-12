@@ -146,6 +146,7 @@ Detailed frontend contract: see [`FRONTEND_INTEGRATION.md`](/Users/danny/Desktop
 
 CORS is enabled in FastAPI middleware and configured by:
 - `CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173,https://your-lovable-frontend.example.com`
+- `CORS_ALLOWED_ORIGIN_REGEX=https://.*\\.vercel\\.app` (default; helps Vercel preview/prod domains)
 
 ## Auth mode
 
