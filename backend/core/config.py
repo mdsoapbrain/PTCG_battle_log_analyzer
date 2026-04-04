@@ -17,6 +17,15 @@ def _parse_csv(value: str) -> list[str]:
     return [x.strip() for x in value.split(",") if x.strip()]
 
 
+def _normalize_database_url(value: str) -> str:
+    raw = value.strip()
+    if raw.startswith("postgres://"):
+        return raw.replace("postgres://", "postgresql+psycopg://", 1)
+    if raw.startswith("postgresql://"):
+        return raw.replace("postgresql://", "postgresql+psycopg://", 1)
+    return raw
+
+
 @dataclass(frozen=True)
 class Settings:
     app_name: str
@@ -43,14 +52,15 @@ def get_settings() -> Settings:
 
     cors_raw = _env("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173")
     cors_regex_raw = _env("CORS_ALLOWED_ORIGIN_REGEX", r"https://.*\.vercel\.app")
+    database_url_raw = _env_with_fallback("DATABASE_URL", "PTCG_DATABASE_URL", "sqlite:///./backend.db")
 
     return Settings(
         app_name=_env_with_fallback("APP_NAME", "PTCG_APP_NAME", "PTCG Battle Log Backend"),
-        app_version=_env_with_fallback("APP_VERSION", "PTCG_APP_VERSION", "0.2.1"),
+        app_version=_env_with_fallback("APP_VERSION", "PTCG_APP_VERSION", "0.2.2"),
         app_env=_env("APP_ENV", "development"),
         app_host=_env("APP_HOST", "0.0.0.0"),
         app_port=app_port,
-        database_url=_env_with_fallback("DATABASE_URL", "PTCG_DATABASE_URL", "sqlite:///./backend.db"),
+        database_url=_normalize_database_url(database_url_raw),
         api_prefix=_env_with_fallback("API_PREFIX", "PTCG_API_PREFIX", ""),
         cors_allowed_origins=_parse_csv(cors_raw),
         cors_allowed_origin_regex=cors_regex_raw.strip() or None,

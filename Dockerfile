@@ -17,7 +17,10 @@ COPY alembic ./alembic
 COPY alembic.ini ./alembic.ini
 COPY sample_log.txt ./sample_log.txt
 COPY README_backend.md ./README_backend.md
+COPY scripts ./scripts
 
 EXPOSE 8001
 
-CMD ["sh", "-c", "uvicorn backend.main:app --host ${APP_HOST:-0.0.0.0} --port ${APP_PORT:-8001}"]
+RUN chmod +x ./scripts/start_backend.sh
+
+CMD ["./scripts/start_backend.sh"]

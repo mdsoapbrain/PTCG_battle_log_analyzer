@@ -2,6 +2,11 @@
 
 Backend is now frontend-consumable and deployment-ready for Lovable integration.
 
+Important:
+- Local development can use SQLite.
+- Production should use Postgres or Supabase Postgres for persistent storage.
+- Render + Docker + SQLite is ephemeral and will reset data after restart or redeploy.
+
 ## Architecture
 
 ```text
@@ -65,6 +70,7 @@ Local SQLite default:
 
 Future Postgres/Supabase example:
 - `DATABASE_URL=postgresql+psycopg://postgres:password@host:5432/dbname`
+- Plain `postgresql://...` and legacy `postgres://...` URLs are also accepted and normalized automatically.
 
 ## Local development
 
@@ -81,6 +87,12 @@ python -m pip install -r requirements.txt
 
 ```bash
 uvicorn backend.main:app --reload --host 0.0.0.0 --port 8001
+```
+
+Or use the same startup flow as production:
+
+```bash
+./scripts/start_backend.sh
 ```
 
 ### 3) Verify
@@ -110,7 +122,30 @@ docker compose up --build
 2. Connect this GitHub repo
 3. Render will detect [`render.yaml`](/Users/danny/Desktop/pokemon_calculator/ptcg-consistency/render.yaml)
 4. Set `API_BASE_URL` and `CORS_ALLOWED_ORIGINS` in the Render UI
-5. Deploy
+5. Manually set `DATABASE_URL` in the Render UI to a persistent Postgres URL
+6. Deploy
+
+Do not leave production on SQLite if you want records to survive redeploys.
+
+If this Render service already exists:
+- `render.yaml` now uses `sync: false` for `DATABASE_URL`
+- Render will not overwrite the current value on sync
+- You must update `DATABASE_URL` manually in the Render Dashboard
+
+## Supabase Postgres setup (recommended)
+
+1. Create a Supabase project.
+2. Open `Project Settings -> Database`.
+3. Copy the connection string.
+4. In Render, open the `ptcg-backend` service.
+5. Go to `Environment`.
+6. Set `DATABASE_URL` to the Supabase connection string.
+7. Redeploy the service.
+
+Notes:
+- This app accepts the raw Supabase `postgresql://...` URL and rewrites it to the correct SQLAlchemy driver form automatically.
+- Container startup now runs `alembic upgrade head`, so schema migration happens automatically on deploy.
+- After redeploy, check `/version`. You want `database_backend=postgres` and `storage_mode=persistent`.
 
 ## API contract
 
@@ -196,6 +231,6 @@ Included:
 
 When moving to Supabase:
 1. Set `DATABASE_URL` to Supabase Postgres connection string.
-2. Run `alembic upgrade head` in target environment.
+2. Deploy the container. Startup runs `alembic upgrade head` automatically.
 3. Replace `AUTH_MODE=stub` with `AUTH_MODE=supabase_jwt` after implementing JWT verification in `auth_stub.py`.
 4. Keep API contract unchanged for frontend continuity.

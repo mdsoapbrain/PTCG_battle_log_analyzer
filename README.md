@@ -7,6 +7,11 @@ This repository now contains both:
 
 Parser/business logic remains in Python.
 
+Important:
+- Local dev can use SQLite.
+- Production should use Postgres/Supabase Postgres.
+- Render Docker + SQLite does not keep data after restart or redeploy.
+
 ## Repo Structure
 
 ```text
@@ -39,6 +44,12 @@ uvicorn backend.main:app --reload --host 0.0.0.0 --port 8001
 Backend docs:
 - [http://localhost:8001/docs](http://localhost:8001/docs)
 
+If you want the same startup flow used in production:
+
+```bash
+./scripts/start_backend.sh
+```
+
 ### 2) Run frontend
 
 Open a second terminal:
@@ -58,6 +69,20 @@ Frontend URL:
 - API base: [https://ptcg-backend-7jos.onrender.com](https://ptcg-backend-7jos.onrender.com)
 - Docs: [https://ptcg-backend-7jos.onrender.com/docs](https://ptcg-backend-7jos.onrender.com/docs)
 - OpenAPI: [https://ptcg-backend-7jos.onrender.com/openapi.json](https://ptcg-backend-7jos.onrender.com/openapi.json)
+
+## Persistent Production Database
+
+To keep match history after redeploys, set `DATABASE_URL` in Render to a Postgres connection string.
+
+Supabase example:
+
+```bash
+DATABASE_URL=postgresql://postgres:password@db-host:5432/postgres
+```
+
+The backend automatically normalizes this to the correct SQLAlchemy driver form and runs migrations on startup.
+
+If your Render service already exists, update `DATABASE_URL` manually in the Render Dashboard. The Blueprint now marks it as `sync: false`, so future syncs will not replace that value for you.
 
 ## Frontend/Backend Contract
 
