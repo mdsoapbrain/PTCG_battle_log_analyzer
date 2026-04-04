@@ -75,6 +75,12 @@ def health():
 
 @app.get("/version", summary="Version info", description="Returns backend version and runtime configuration metadata.")
 def version():
+    database_backend = "sqlite" if settings.database_url.startswith("sqlite") else "postgres"
+    storage_mode = "ephemeral" if settings.app_env == "production" and database_backend == "sqlite" else "persistent"
+    storage_warning = None
+    if storage_mode == "ephemeral":
+        storage_warning = "Production SQLite on Render Docker will reset on restart or redeploy."
+
     return success_response(
         message="Version fetched successfully.",
         data={
@@ -83,6 +89,9 @@ def version():
             "app_env": settings.app_env,
             "auth_mode": settings.auth_mode,
             "api_base_url": settings.api_base_url,
+            "database_backend": database_backend,
+            "storage_mode": storage_mode,
+            "storage_warning": storage_warning,
         },
     )
 

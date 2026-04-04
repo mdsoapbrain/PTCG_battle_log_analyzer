@@ -3,14 +3,32 @@ import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, User, Shield, Wifi } from "lucide-react";
 
+interface BackendVersionInfo {
+  app_env?: string;
+  auth_mode?: string;
+  database_backend?: string;
+  storage_mode?: string;
+  storage_warning?: string | null;
+}
+
 export default function SettingsPage() {
   const { user, isAuthenticated } = useAuth();
   const [backendStatus, setBackendStatus] = useState<"checking" | "online" | "offline">("checking");
+  const [backendInfo, setBackendInfo] = useState<BackendVersionInfo | null>(null);
   const apiBase = (import.meta.env.VITE_API_BASE_URL || "http://localhost:8001").replace(/\/+$/, "");
 
   useEffect(() => {
-    fetch(`${apiBase}/health`)
-      .then((r) => setBackendStatus(r.ok ? "online" : "offline"))
+    Promise.all([
+      fetch(`${apiBase}/health`),
+      fetch(`${apiBase}/version`),
+    ])
+      .then(async ([healthRes, versionRes]) => {
+        setBackendStatus(healthRes.ok ? "online" : "offline");
+        if (versionRes.ok) {
+          const payload = await versionRes.json();
+          setBackendInfo(payload?.data ?? null);
+        }
+      })
       .catch(() => setBackendStatus("offline"));
   }, [apiBase]);
 
@@ -69,9 +87,23 @@ export default function SettingsPage() {
             <Shield className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Auth Mode</span>
           </div>
-          <Badge variant="secondary">Stub</Badge>
+          <Badge variant="secondary">{backendInfo?.auth_mode || "Stub"}</Badge>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm">
+            <Shield className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Database</span>
+          </div>
+          <Badge variant="secondary">{backendInfo?.database_backend || "Unknown"}</Badge>
         </div>
       </div>
+
+      {backendInfo?.storage_warning && (
+        <div className="rounded-lg border border-loss/30 bg-loss/5 p-5">
+          <h2 className="font-display font-semibold text-foreground mb-2">Storage Warning</h2>
+          <p className="text-sm text-muted-foreground">{backendInfo.storage_warning}</p>
+        </div>
+      )}
 
       {/* Future */}
       <div className="rounded-lg border border-dashed border-border bg-card/50 p-5">

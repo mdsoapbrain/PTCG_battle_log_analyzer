@@ -46,7 +46,7 @@ def get_settings() -> Settings:
 
     return Settings(
         app_name=_env_with_fallback("APP_NAME", "PTCG_APP_NAME", "PTCG Battle Log Backend"),
-        app_version=_env_with_fallback("APP_VERSION", "PTCG_APP_VERSION", "0.2.0"),
+        app_version=_env_with_fallback("APP_VERSION", "PTCG_APP_VERSION", "0.2.1"),
         app_env=_env("APP_ENV", "development"),
         app_host=_env("APP_HOST", "0.0.0.0"),
         app_port=app_port,

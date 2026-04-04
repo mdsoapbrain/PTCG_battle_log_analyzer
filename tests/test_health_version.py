@@ -13,3 +13,5 @@ def test_health_and_version(client) -> None:
     version_payload = version.json()
     assert version_payload["success"] is True
     assert "app_version" in version_payload["data"]
+    assert "database_backend" in version_payload["data"]
+    assert "storage_mode" in version_payload["data"]

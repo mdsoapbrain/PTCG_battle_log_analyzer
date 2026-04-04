@@ -10,6 +10,51 @@ class MatchRepository:
     def __init__(self, db: Session):
         self.db = db
 
+    @staticmethod
+    def _result_from_parsed(parsed: dict) -> str:
+        if parsed.get("winner") == "You":
+            return "win"
+        if parsed.get("winner") == "Opp":
+            return "loss"
+        return "unknown"
+
+    @staticmethod
+    def _went_first_from_parsed(parsed: dict) -> bool | None:
+        if parsed.get("you_go_first") == 1:
+            return True
+        if parsed.get("you_go_first") == 0:
+            return False
+        return None
+
+    def _apply_match_derivations(
+        self,
+        *,
+        match: Match,
+        parsed: dict,
+        player_deck: str | None,
+        opponent_deck: str | None,
+        summary_text: str,
+    ) -> bool:
+        updated = False
+        next_values = {
+            "opponent_name": parsed.get("opp_name", "Unknown"),
+            "player_deck": player_deck,
+            "opponent_deck": opponent_deck,
+            "went_first": self._went_first_from_parsed(parsed),
+            "result": self._result_from_parsed(parsed),
+            "turn_count": int(parsed.get("total_turns", 0)),
+            "prizes_taken": int(parsed.get("you_prize_taken", 0)),
+            "prizes_lost": int(parsed.get("opp_prize_taken", 0)),
+            "prize_diff": int(parsed.get("you_prize_taken", 0)) - int(parsed.get("opp_prize_taken", 0)),
+            "summary_text": summary_text,
+        }
+
+        for field_name, next_value in next_values.items():
+            if getattr(match, field_name) != next_value:
+                setattr(match, field_name, next_value)
+                updated = True
+        return updated
+
     def create_match(
         self,
         *,
@@ -20,25 +65,26 @@ class MatchRepository:
         opponent_deck: str | None,
         summary_text: str,
     ) -> Match:
-        result = "unknown"
-        if parsed.get("winner") == "You":
-            result = "win"
-        elif parsed.get("winner") == "Opp":
-            result = "loss"
-
         match = Match(
             user_id=user_id,
             source_log=source_log,
             player_name=parsed.get("you_name", "Unknown"),
-            opponent_name=parsed.get("opp_name", "Unknown"),
+            opponent_name="Unknown",
             player_deck=player_deck,
             opponent_deck=opponent_deck,
-            went_first=(True if parsed.get("you_go_first") == 1 else False if parsed.get("you_go_first") == 0 else None),
-            result=result,
-            turn_count=int(parsed.get("total_turns", 0)),
-            prizes_taken=int(parsed.get("you_prize_taken", 0)),
-            prizes_lost=int(parsed.get("opp_prize_taken", 0)),
-            prize_diff=int(parsed.get("you_prize_taken", 0)) - int(parsed.get("opp_prize_taken", 0)),
+            went_first=None,
+            result="unknown",
+            turn_count=0,
+            prizes_taken=0,
+            prizes_lost=0,
+            prize_diff=0,
+            summary_text=None,
+        )
+        self._apply_match_derivations(
+            match=match,
+            parsed=parsed,
+            player_deck=player_deck,
+            opponent_deck=opponent_deck,
             summary_text=summary_text,
         )
         self.db.add(match)
@@ -82,6 +128,30 @@ class MatchRepository:
         self.db.commit()
         self.db.refresh(match)
         return match
+
+    def repair_saved_matches(self) -> int:
+        from backend.core.battle_summary import render_competitive_summary
+        from backend.core.parser import parse_log
+
+        repaired = 0
+        matches = self.db.execute(select(Match)).scalars().all()
+        for match in matches:
+            parsed = parse_log(match.source_log, you_name=match.player_name)
+            parsed["you_deck_name"] = match.player_deck
+            parsed["opp_deck_name"] = match.opponent_deck
+            summary_text = render_competitive_summary(parsed)
+            if self._apply_match_derivations(
+                match=match,
+                parsed=parsed,
+                player_deck=match.player_deck,
+                opponent_deck=match.opponent_deck,
+                summary_text=summary_text,
+            ):
+                repaired += 1
+
+        if repaired:
+            self.db.commit()
+        return repaired
 
     def list_matches(
         self,

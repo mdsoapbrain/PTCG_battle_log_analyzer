@@ -23,8 +23,11 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, clas
 
 def init_db() -> None:
     from backend.core import models  # noqa: F401  # Ensure model metadata is imported.
+    from backend.repositories.match_repository import MatchRepository
 
     Base.metadata.create_all(bind=engine)
+    with SessionLocal() as db:
+        MatchRepository(db).repair_saved_matches()
 
 
 def get_db() -> Generator[Session, None, None]:

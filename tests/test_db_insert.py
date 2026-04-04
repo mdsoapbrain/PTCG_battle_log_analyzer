@@ -26,3 +26,5 @@ Opponent conceded. Neurologist2024 wins.
     count = db_session.execute(select(Match)).scalars().all()
     assert len(count) == 1
     assert count[0].result == "win"
+    assert count[0].went_first is False
+    assert count[0].opponent_name == "Rival"
